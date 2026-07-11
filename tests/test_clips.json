@@ -1,0 +1,32 @@
+[
+    {
+        "task_id": "test_01_office",
+        "video_url": "https://storage.googleapis.com/amd-hackathon-clips/3044693-uhd_3840_2160_24fps.mp4",
+        "styles": ["formal", "sarcastic", "humorous_tech", "humorous_non_tech"],
+        "category": "people/technology"
+    },
+    {
+        "task_id": "test_02_kitten",
+        "video_url": "https://storage.googleapis.com/amd-hackathon-clips/13825391-uhd_3840_2160_30fps.mp4",
+        "styles": ["formal", "sarcastic", "humorous_tech", "humorous_non_tech"],
+        "category": "animals"
+    },
+    {
+        "task_id": "test_03_toddler",
+        "video_url": "https://hdspeechtherapy.com.au/wp-content/uploads/2024/05/4158916-uhd_3840_2160_24fps.mp4",
+        "styles": ["formal", "sarcastic", "humorous_tech", "humorous_non_tech"],
+        "category": "people/food"
+    },
+    {
+        "task_id": "test_04_milkyway",
+        "video_url": "https://obsiracoffee.com/wp-content/uploads/9340918-uhd_3840_2160_24fps.mp4",
+        "styles": ["formal", "sarcastic", "humorous_tech", "humorous_non_tech"],
+        "category": "nature"
+    },
+    {
+        "task_id": "test_05_bridge",
+        "video_url": "https://romesultimate.com/wp-content/uploads/2025/01/13118329-uhd_3840_2160_24fps.mp4",
+        "styles": ["formal", "sarcastic", "humorous_tech", "humorous_non_tech"],
+        "category": "urban"
+    }
+]
