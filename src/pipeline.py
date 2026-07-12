@@ -106,8 +106,8 @@ def extract_frames(video_url, task_id):
         cmd_ffmpeg = [
             "ffmpeg", "-y",
             "-i", video_url,
-            "-vf", f"fps=10/{duration_float},scale=384:-1",
-            "-vframes", "10",
+            "-vf", f"fps=16/{duration_float},scale=512:-1",
+            "-vframes", "16",
             "-q:v", "2",
             os.path.join(temp_dir, "frame_%03d.jpg")
         ]
@@ -157,7 +157,7 @@ def _call_vision_model_once(base64_frames, model_id, timeout, task_id):
             "text": (
                 "Analyze these sequential frames from a short video clip. "
                 "Produce a structured JSON factual ledger. "
-                "Required format: {\"scene_tags\": [\"lightweight\", \"tags\", \"e.g.\", \"sports\", \"action\", \"office\"], \"confirmed_subjects\": [\"clearly visible subjects\"], \"confirmed_setting\": \"brief setting description\", \"confirmed_actions\": [\"chronological\", \"list\", \"of\", \"actions\"], \"sequence_of_play\": \"Concise summary of how actions unfold temporally and how subjects interact (e.g. 'Players from opposing teams contested possession while advancing'). Focus on dynamics rather than static enumeration.\", \"uncertainties\": [\"list of things that are unclear\"]}. "
+                "Required format: {\"scene_setting\": \"brief description\", \"environment_context\": \"contextual details\", \"subjects\": [{\"description\": \"...\", \"confidence\": \"confirmed/likely/uncertain\"}], \"actions\": [{\"description\": \"...\", \"confidence\": \"confirmed/likely/uncertain\"}], \"notable_visual_details\": [\"...\"], \"chronological_flow\": [\"action 1\", \"action 2\"]}. "
                 "Do not infer emotions, thoughts, or off-screen context. "
                 "Return ONLY a valid JSON object."
             )
@@ -247,10 +247,10 @@ def call_text_model(facts, styles, timeout, task_id):
     }
     
     style_instructions = {
-        "formal": "formal: Forensic report style. Prioritize chronological actions over excessive visual descriptions (especially for food/objects). Use natural phrasing (e.g., 'an orange juvenile feline'). Forbid emotional adjectives. Max 40 words.",
-        "sarcastic": "sarcastic: Strictly use antiphrasis. Exaggerate ONLY the historical or epic significance of directly observed actions. NEVER invent invisible intentions (e.g., 'plotting'), motivations, or backstory. NEVER declare an action has 'no reason'. NEVER attribute human motives, vendettas, or emotions to inanimate objects, tools, or isolated body parts. For intense scenes (sports/weather), deadpan or undersell the exertion. Keep sarcasm anchored entirely to literal events. Max 40 words.",
-        "humorous_tech": "humorous_tech: Use software/IT metaphors, dynamically adapting the domain (OS, DBs, CI/CD, Compilers, GPU, game engines, physics simulations, etc.) to fit the specific scene. For physical sports, map athletic actions to IT equivalents (e.g., collision detection, brute-force algorithms, bandwidth exhaustion, packet loss, I/O bottlenecks). Ensure metaphors make semantic sense. Max 40 words.",
-        "humorous_non_tech": "humorous_non_tech: Casual internet hyperbole. Forbid technical jargon. Exaggerate the scale of the action, but NEVER invent unobserved behavioral traits, intent, or backstory (e.g., do not say 'forgot where he parked'). NEVER attribute human motives, vendettas, or emotions to inanimate objects, tools, or isolated body parts. NEVER use subjective adverbs for actions (e.g., 'dramatic flop'). Max 40 words."
+        "formal": "formal: Forensic report style. Prioritize chronological actions over excessive visual descriptions (especially for food/objects). Use natural phrasing (e.g., 'an orange juvenile feline'). Forbid emotional adjectives. Length: 2-4 sentences.",
+        "sarcastic": "sarcastic: Strictly use antiphrasis. Exaggerate ONLY the historical or epic significance of directly observed actions. NEVER invent invisible intentions (e.g., 'plotting'), motivations, or backstory. NEVER declare an action has 'no reason'. NEVER attribute human motives, vendettas, or emotions to inanimate objects, tools, or isolated body parts. For intense scenes (sports/weather), deadpan or undersell the exertion. Keep sarcasm anchored entirely to literal events. Length: 2-4 sentences.",
+        "humorous_tech": "humorous_tech: Use software/IT metaphors, dynamically adapting the domain (OS, DBs, CI/CD, Compilers, GPU, game engines, physics simulations, etc.) to fit the specific scene. For physical sports, map athletic actions to IT equivalents (e.g., collision detection, brute-force algorithms, bandwidth exhaustion, packet loss, I/O bottlenecks). Ensure metaphors make semantic sense. Length: 2-4 sentences.",
+        "humorous_non_tech": "humorous_non_tech: Casual internet hyperbole. Forbid technical jargon. Exaggerate the scale of the action, but NEVER invent unobserved behavioral traits, intent, or backstory (e.g., do not say 'forgot where he parked'). NEVER attribute human motives, vendettas, or emotions to inanimate objects, tools, or isolated body parts. NEVER use subjective adverbs for actions (e.g., 'dramatic flop'). Length: 2-4 sentences."
     }
     
     active_instructions = [style_instructions[s] for s in styles if s in style_instructions]
@@ -265,7 +265,7 @@ def call_text_model(facts, styles, timeout, task_id):
         "messages": [
             {
                 "role": "system",
-                "content": "You are an expert linguistic adapter. You receive a JSON Factual Ledger from a vision model. You must extract the nouns, verbs, and dynamics from 'confirmed_subjects', 'confirmed_setting', 'confirmed_actions', and 'sequence_of_play' and map them directly to the stylistic persona. Do not include 'uncertainties'. CRITICAL ANTI-HALLUCINATION RULES: 1. Exaggerate the *significance* of an action, never invent the *intent* behind it. 2. Never declare an action happened for 'no reason'. 3. Forbid subjective adverbs/adjectives for physical actions (e.g. 'gracefully', 'dramatic'). Do not introduce any entities, actions, or outcomes that are not explicitly listed in the confirmed sections. Use the 'scene_tags' to adapt your humor and metaphors to the specific context of the clip. Rewrite these facts into distinctly-toned captions based on the requested styles. Return ONLY a valid JSON object, no other text. Keep all generated captions to a strict maximum of 40 words."
+                "content": "You are an expert linguistic adapter. You receive a JSON Factual Ledger from a vision model. You must extract the nouns, verbs, and dynamics from 'subjects', 'actions', 'scene_setting', and 'chronological_flow' and map them directly to the stylistic persona. Do not include unconfirmed details. CRITICAL ANTI-HALLUCINATION RULES: 1. Exaggerate the *significance* of an action, never invent the *intent* behind it. 2. Never declare an action happened for 'no reason'. 3. Forbid subjective adverbs/adjectives for physical actions (e.g. 'gracefully', 'dramatic'). Do not introduce any entities, actions, or outcomes that are not explicitly listed in the confirmed sections. Use the 'environment_context' to adapt your humor and metaphors to the specific context of the clip. Rewrite these facts into distinctly-toned captions based on the requested styles. Return ONLY a valid JSON object, no other text. Keep all generated captions between 2-4 sentences."
             },
             {
                 "role": "user",
@@ -324,7 +324,7 @@ def validate_and_overwrite(json_text, requested_styles, placeholder, task_id):
         value_str = str(value).strip()
         
         # Enforce hard length limit (allow small buffer for punctuation split)
-        if len(value_str.split()) > 45:
+        if len(value_str.split()) > 120:
             log_event("validation", task_id, "warning", message=f"Style {style} exceeded word limit")
             final_data[style] = placeholder.get(style, "This clip shows a sequence of events.")
             continue
