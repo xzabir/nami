@@ -12,8 +12,7 @@ RUN pip install --no-cache-dir -r requirements.txt
 
 COPY . .
 
-# Hardcoded for Track 2 submission compliance
-ENV FIREWORKS_API_KEY="<YOUR_FIREWORKS_API_KEY>"
+
 ENV PYTHONPATH="/app"
 
 # Ensure standard input/output directories exist

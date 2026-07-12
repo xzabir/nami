@@ -4,8 +4,8 @@ import sys
 from http.server import HTTPServer, SimpleHTTPRequestHandler
 
 # Add src to path so we can import pipeline
-sys.path.append(os.path.join(os.path.dirname(__file__), 'src'))
-from pipeline import process_clip
+sys.path.append(os.path.join(os.path.dirname(__file__)))
+from engine.core.pipeline import process_clip
 
 PORT = int(os.environ.get('PORT', 8000))
 
