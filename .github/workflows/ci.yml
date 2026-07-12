@@ -27,12 +27,27 @@ jobs:
         FIREWORKS_API_KEY: ${{ secrets.FIREWORKS_API_KEY }}
         PYTHONPATH: ${{ github.workspace }}
       run: |
-        # Quick validation using a mock task file
         python docker/entrypoint.py
 
-  docker-build:
+  docker-build-and-push:
     runs-on: ubuntu-latest
+    needs: build-and-test
+    if: github.ref == 'refs/heads/main' && github.event_name == 'push'
     steps:
     - uses: actions/checkout@v3
-    - name: Build Docker Image
-      run: docker build -f docker/Dockerfile -t nami:latest .
+
+    - name: Log in to Docker Hub
+      uses: docker/login-action@v3
+      with:
+        username: ${{ secrets.DOCKERHUB_USERNAME }}
+        password: ${{ secrets.DOCKERHUB_TOKEN }}
+
+    - name: Build and push Docker image
+      uses: docker/build-push-action@v5
+      with:
+        context: .
+        file: docker/Dockerfile
+        push: true
+        tags: |
+          xzabir/nami:latest
+          xzabir/nami:${{ github.sha }}
