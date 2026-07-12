@@ -34,16 +34,16 @@ def build_text_prompt(facts, styles, domain="General"):
     instructions_text = "\n".join(active_instructions)
     format_example = "{" + ", ".join([f'"{s}": "..."' for s in styles]) + "}"
     
-    user_prompt = f"JSON Temporal Scene Graph:\n{facts}\n\nIdentified Domain: {domain}\n\nInstructions per style:\n{instructions_text}\n\nRequired output format: exactly {format_example}"
+    user_prompt = f"Markdown Scene Description:\n{facts}\n\nIdentified Domain: {domain}\n\nInstructions per style:\n{instructions_text}\n\nRequired output format: exactly {format_example}"
     
     system_prompt = (
-        "You are an expert linguistic adapter. You receive a JSON Temporal Scene Graph from a vision model. "
-        "You must extract the entities and events from the graph and map them directly to the stylistic persona. "
+        "You are an expert linguistic adapter. You receive a Markdown Scene Description from a vision model. "
+        "You must extract the entities and events from the description and map them directly to the stylistic persona. "
         "CRITICAL HALLUCINATION PREVENTION RULES:\n"
-        "1. You MUST ONLY reference entities that exist in the 'entities' dictionary, and you MUST incorporate any relevant facts, texts, or signs listed in 'key_visual_elements'.\n"
-        "2. CONFIDENCE GATING: For OCR, on-screen text, and signs: If they have 'low' or 'medium' confidence, exclude them entirely from your caption. Do not mention them. For main subjects and events, include them even if confidence is medium or low, but adjust your certainty in the description.\n"
+        "1. You MUST ONLY reference entities, events, and texts that exist in the scene description.\n"
+        "2. CONFIDENCE GATING: If the vision model mentions text or details as uncertain or unclear, exclude them entirely from your caption. Do not mention them. For main subjects and events, include them even if confidence is low, but adjust your certainty in the description.\n"
         "3. Exaggerate the *significance* of an action, never invent the *intent* behind it.\n"
-        "4. Do not introduce any entities, actions, or outcomes that are not explicitly listed in the graph.\n"
+        "4. Do not introduce any entities, actions, or outcomes that are not explicitly listed in the description.\n"
         "5. SEAMLESS CAPTIONING: DO NOT expose internal reasoning, the inference process, or image quality issues. DO NOT mention 'frames', 'sequence', 'documents', 'confidence', 'stylized filtering', 'artifacts', 'OCR', or 'unclear text'. Describe the scene naturally. If text/signs are unclear, ignore them entirely rather than stating they are unclear.\n"
         f"Use the identified domain ('{domain}') to inject domain-specific terminology, metaphors, and pacing into your writing. "
         "Rewrite these facts into distinctly-toned captions based on the requested styles. "
