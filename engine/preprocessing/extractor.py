@@ -13,8 +13,8 @@ def extract_frames(video_url, duration, task_id, start_time):
         cmd_ffmpeg = [
             "ffmpeg", "-y",
             "-i", video_url,
-            "-vf", f"fps=16/{duration_float},scale=512:-1",
-            "-vframes", "16",
+            "-vf", f"fps=32/{duration_float},scale=512:-1",
+            "-vframes", "32",
             "-q:v", "2",
             os.path.join(temp_dir, "frame_%03d.jpg")
         ]

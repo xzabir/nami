@@ -5,6 +5,7 @@ import concurrent.futures
 from engine.utils.logging import log_event
 from engine.utils.config import CONFIG
 from engine.preprocessing.video_validator import get_video_duration
+from engine.preprocessing.downloader import download_video
 from engine.preprocessing.extractor import extract_frames
 from engine.providers.fireworks import call_vision_model, call_text_model
 from engine.prompting.caption_validator import validate_and_overwrite
@@ -27,8 +28,14 @@ def process_clip(video_url, styles, task_id):
     start_time = time.time()
     placeholder = get_placeholder_captions(styles)
     try:
-        duration = get_video_duration(video_url, task_id, start_time)
-        base64_frames = extract_frames(video_url, duration, task_id, start_time)
+        local_video_path = download_video(video_url, task_id, start_time)
+        try:
+            duration = get_video_duration(local_video_path, task_id, start_time)
+            base64_frames = extract_frames(local_video_path, duration, task_id, start_time)
+        finally:
+            if os.path.exists(local_video_path):
+                os.remove(local_video_path)
+                
         facts = call_vision_model(base64_frames, task_id, start_time)
 
         elapsed = time.time() - start_time

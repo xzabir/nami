@@ -59,11 +59,10 @@ def _call_vision_model_once(base64_frames, model_id, timeout, task_id, start_tim
         
     payload = {
         "model": model_id,
-        "response_format": {"type": "json_object"},
         "messages": [
             {
                 "role": "system",
-                "content": "You are an objective, forensic video analyst. Your sole purpose is literal transcription of visual evidence and temporal dynamics into a structured JSON ledger."
+                "content": "You are an objective, forensic video analyst. Your sole purpose is literal transcription of visual evidence and temporal dynamics into a structured Markdown narrative."
             },
             {
                 "role": "user",
