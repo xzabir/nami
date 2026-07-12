@@ -1,0 +1,12 @@
+services:
+  - type: web
+    name: nami-final
+    runtime: docker
+    dockerfilePath: docker/Dockerfile
+    dockerCommand: python web_test_server.py
+    envVars:
+      - key: FIREWORKS_API_KEY
+        sync: false
+      - key: PYTHONPATH
+        value: /app
+    healthCheckPath: /
