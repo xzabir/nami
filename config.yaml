@@ -1,6 +1,6 @@
 # Global Budget
 total_budget_seconds: 585  # 10 minutes (600s) minus 15s safety buffer
-clip_budget_seconds: 30
+clip_budget_seconds: 45
 
 # Parallelism
 max_workers: 2
@@ -19,7 +19,7 @@ text:
 timeouts:
   ffprobe: 20
   ffmpeg: 20
-  primary_vision: 12
+  primary_vision: 18
   fallback_vision: 8
   text_generation: 15
 

@@ -13,10 +13,20 @@ def validate_and_overwrite(json_text, requested_styles, placeholder, task_id, st
     if match:
         json_text = match.group(0)
 
+    json_text = json_text.strip()
+    if json_text.startswith("```json"):
+        json_text = json_text[7:]
+    elif json_text.startswith("```"):
+        json_text = json_text[3:]
+    if json_text.endswith("```"):
+        json_text = json_text[:-3]
+    json_text = json_text.strip()
+
     try:
         data = json.loads(json_text)
-    except json.JSONDecodeError as e:
-        log_event("validation", task_id, "error", time.time() - start_time, "JSON decode error")
+    except json.JSONDecodeError:
+        log_event("clip_end", task_id, "error", latency_sec=time.time()-start_time, message="Validation failed entirely")
+        print(f"FAILED JSON TEXT: {json_text}")
         return None
 
     # Case-insensitive key matching

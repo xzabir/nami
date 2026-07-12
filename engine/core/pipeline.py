@@ -40,7 +40,7 @@ def process_clip(video_url, styles, task_id):
 
         elapsed = time.time() - start_time
         remaining = CONFIG['clip_budget_seconds'] - elapsed - 2
-        text_timeout = max(6, min(CONFIG['timeouts']['text_generation'], remaining))
+        text_timeout = max(8, min(CONFIG['timeouts']['text_generation'], remaining))
         
         json_text = call_text_model(facts, styles, timeout=text_timeout, task_id=task_id, start_time=start_time)
         final_captions = validate_and_overwrite(json_text, styles, placeholder, task_id, start_time)
@@ -85,8 +85,7 @@ def run_pipeline(input_path, output_path):
         results.append(result_entry)
         results_map[task_id] = result_entry
         
-    write_results(results, output_path)
-    log_event("init", "system", "success", message=f"Loaded {len(tasks)} tasks and wrote placeholders")
+    log_event("init", "system", "success", message=f"Loaded {len(tasks)} tasks")
     
     total_budget_seconds = CONFIG['total_budget_seconds']
     
@@ -113,8 +112,7 @@ def run_pipeline(input_path, output_path):
                     
                     if final_captions:
                         results_map[task_id]["captions"] = final_captions
-                        write_results(results, output_path)
-                        log_event("result_collector", task_id, "success", message="Successfully wrote output to file")
+                        log_event("result_collector", task_id, "success", message="Successfully processed output")
                     else:
                         log_event("result_collector", task_id, "warning", message="Returned None, keeping placeholder.")
                         
@@ -125,4 +123,5 @@ def run_pipeline(input_path, output_path):
         except concurrent.futures.TimeoutError:
             log_event("scheduler", "system", "error", message="Global as_completed timeout reached, aborting collection.")
 
+    write_results(results, output_path)
     log_event("shutdown", "system", "success", time.time() - start_time, "Pipeline shutdown complete")

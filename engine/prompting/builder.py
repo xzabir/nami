@@ -11,7 +11,18 @@ STYLES_TEMPLATE = load_template("styles.txt")
 def build_vision_prompt():
     return GROUNDING_TEMPLATE
 
-def build_text_prompt(facts, styles):
+def build_verifier_prompt(primary_facts):
+    system_prompt = (
+        "You are an elite QA vision model. Your job is to rigorously audit the object classification and spatial "
+        "anchoring of the provided JSON Temporal Scene Graph based on the visual evidence in the frames.\n"
+        "Look for common perception errors (e.g., misclassifying a street lamp as a traffic light, or attaching "
+        "a camera to a pole instead of a building wall). Verify every entity's exact placement.\n"
+        "You MUST return the corrected JSON object using the exact same schema. Do NOT wrap in markdown code fences."
+    )
+    user_prompt = f"Please verify and correct the following JSON Temporal Scene Graph:\n{primary_facts}"
+    return system_prompt, user_prompt
+
+def build_text_prompt(facts, styles, domain="General"):
     lines = STYLES_TEMPLATE.split("\n")
     style_instructions = {}
     for line in lines:
@@ -23,8 +34,20 @@ def build_text_prompt(facts, styles):
     instructions_text = "\n".join(active_instructions)
     format_example = "{" + ", ".join([f'"{s}": "..."' for s in styles]) + "}"
     
-    user_prompt = f"Markdown Scene Description:\n{facts}\n\nInstructions per style:\n{instructions_text}\n\nRequired output format: exactly {format_example}"
+    user_prompt = f"JSON Temporal Scene Graph:\n{facts}\n\nIdentified Domain: {domain}\n\nInstructions per style:\n{instructions_text}\n\nRequired output format: exactly {format_example}"
     
-    system_prompt = "You are an expert linguistic adapter. You receive a Markdown Scene Description from a vision model. You must extract the nouns, verbs, and dynamics from the description and map them directly to the stylistic persona. Do not include unconfirmed details. CRITICAL ANTI-HALLUCINATION RULES: 1. Exaggerate the *significance* of an action, never invent the *intent* behind it. 2. Never declare an action happened for 'no reason'. 3. Forbid subjective adverbs/adjectives for physical actions (e.g. 'gracefully', 'dramatic'). Do not introduce any entities, actions, or outcomes that are not explicitly listed in the description. Use the environment details to adapt your humor and metaphors to the specific context of the clip. Rewrite these facts into distinctly-toned captions based on the requested styles. Return ONLY a valid JSON object, no other text. Do NOT wrap the JSON in markdown code fences. Keep all generated captions between 2-4 sentences."
+    system_prompt = (
+        "You are an expert linguistic adapter. You receive a JSON Temporal Scene Graph from a vision model. "
+        "You must extract the entities and events from the graph and map them directly to the stylistic persona. "
+        "CRITICAL HALLUCINATION PREVENTION RULES:\n"
+        "1. You MUST ONLY reference entities that exist in the 'entities' dictionary, and you MUST incorporate any relevant facts, texts, or signs listed in 'key_visual_elements'.\n"
+        "2. CONFIDENCE GATING: If a subject, event, or on-screen text has 'low' or 'medium' confidence, exclude it entirely from your caption. DO NOT mention it and DO NOT state that it is unclear. Only incorporate items with 'high' confidence.\n"
+        "3. Exaggerate the *significance* of an action, never invent the *intent* behind it.\n"
+        "4. Do not introduce any entities, actions, or outcomes that are not explicitly listed in the graph.\n"
+        "5. SEAMLESS CAPTIONING: DO NOT expose internal reasoning, the inference process, or image quality issues. DO NOT mention 'frames', 'sequence', 'documents', 'confidence', 'stylized filtering', 'artifacts', 'OCR', or 'unclear text'. Describe the scene naturally. If text/signs are unclear, ignore them entirely rather than stating they are unclear.\n"
+        f"Use the identified domain ('{domain}') to inject domain-specific terminology, metaphors, and pacing into your writing. "
+        "Rewrite these facts into distinctly-toned captions based on the requested styles. "
+        "Return ONLY a valid JSON object, no other text. Do NOT wrap the JSON in markdown code fences. Keep all generated captions between 2-4 sentences."
+    )
     
     return system_prompt, user_prompt
