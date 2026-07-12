@@ -70,22 +70,25 @@ def main():
             futures[future] = task_id
         
         # Collect results as they complete (not in submission order)
-        for future in concurrent.futures.as_completed(futures, timeout=TOTAL_BUDGET_SECONDS - (time.time() - start_time)):
-            task_id = futures[future]
-            try:
-                final_captions = future.result(timeout=CONFIG['clip_budget_seconds'] + 5)
-                
-                if final_captions:
-                    results_map[task_id]["captions"] = final_captions
-                    write_results(results)
-                    log_event("result_collector", task_id, "success", message="Successfully wrote output to file")
-                else:
-                    log_event("result_collector", task_id, "warning", message="Returned None, keeping placeholder.")
+        try:
+            for future in concurrent.futures.as_completed(futures, timeout=TOTAL_BUDGET_SECONDS - (time.time() - start_time)):
+                task_id = futures[future]
+                try:
+                    final_captions = future.result(timeout=CONFIG['clip_budget_seconds'] + 5)
                     
-            except concurrent.futures.TimeoutError:
-                log_event("result_collector", task_id, "error", message="Timeout processing task, keeping placeholder.")
-            except Exception as e:
-                log_event("result_collector", task_id, "error", message=f"Error processing task: {e}")
+                    if final_captions:
+                        results_map[task_id]["captions"] = final_captions
+                        write_results(results)
+                        log_event("result_collector", task_id, "success", message="Successfully wrote output to file")
+                    else:
+                        log_event("result_collector", task_id, "warning", message="Returned None, keeping placeholder.")
+                        
+                except concurrent.futures.TimeoutError:
+                    log_event("result_collector", task_id, "error", message="Timeout processing task, keeping placeholder.")
+                except Exception as e:
+                    log_event("result_collector", task_id, "error", message=f"Error processing task: {e}")
+        except concurrent.futures.TimeoutError:
+            log_event("scheduler", "system", "error", message="Global as_completed timeout reached, aborting collection.")
 
     log_event("shutdown", "system", "success", time.time() - start_time, "Pipeline shutdown complete")
 

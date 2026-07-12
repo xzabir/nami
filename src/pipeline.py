@@ -63,8 +63,14 @@ def _vision_output_usable(text):
 def get_placeholder_captions(styles):
     """Step 0 - Immediate fallback write"""
     placeholder = {}
+    fallback_texts = {
+        "formal": "The video clip depicts a sequence of events occurring over time.",
+        "sarcastic": "Wow, what an incredibly thrilling and entirely unexpected sequence of events.",
+        "humorous_tech": "The physical entities in the frame executed their default physics subroutines.",
+        "humorous_non_tech": "Stuff happened in this video and honestly I can't even process it right now."
+    }
     for style in styles:
-        placeholder[style] = "This clip shows a sequence of events."
+        placeholder[style] = fallback_texts.get(style, "This clip shows a sequence of events.")
     return placeholder
 
 # ---------------------------------------------------------------------------
