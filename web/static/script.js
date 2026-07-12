@@ -39,10 +39,17 @@ document.addEventListener('DOMContentLoaded', () => {
                 })
             });
 
-            const data = await response.json();
+            let data;
+            const contentType = response.headers.get('content-type') || '';
+            if (contentType.includes('application/json')) {
+                data = await response.json();
+            } else {
+                const text = await response.text();
+                throw new Error(`Server error (${response.status}): ${text.slice(0, 120)}`);
+            }
 
             if (!response.ok) {
-                throw new Error(data.error || 'Failed to generate captions');
+                throw new Error(data.error || `Request failed with status ${response.status}`);
             }
 
             // Success: Play video background
