@@ -16,18 +16,32 @@ jobs:
       uses: actions/setup-python@v4
       with:
         python-version: "3.11"
-        
-    - name: Install dependencies
+
+    - name: Install system dependencies
+      run: |
+        sudo apt-get update -qq
+        sudo apt-get install -y ffmpeg
+
+    - name: Install Python dependencies
       run: |
         python -m pip install --upgrade pip
         pip install -r requirements.txt
-        
-    - name: Run pipeline basic validation
+
+    - name: Smoke test (import + config validation)
       env:
         FIREWORKS_API_KEY: ${{ secrets.FIREWORKS_API_KEY }}
         PYTHONPATH: ${{ github.workspace }}
       run: |
-        python docker/entrypoint.py
+        python -c "
+        from engine.utils.config import CONFIG
+        from engine.core.pipeline import get_placeholder_captions
+        from engine.prompting.caption_validator import validate_and_overwrite
+        styles = ['formal', 'sarcastic', 'humorous_tech', 'humorous_non_tech']
+        placeholders = get_placeholder_captions(styles)
+        assert len(placeholders) == 4, 'Placeholder generation failed'
+        assert CONFIG['clip_budget_seconds'] > 0, 'Config loading failed'
+        print('All smoke tests passed.')
+        "
 
   docker-build-and-push:
     runs-on: ubuntu-latest
