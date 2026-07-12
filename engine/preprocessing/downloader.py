@@ -3,7 +3,6 @@ import requests
 import tempfile
 import time
 from engine.utils.logging import log_event
-from engine.utils.config import CONFIG
 
 def download_video(video_url, task_id, start_time):
     """Download video locally to prevent ffmpeg network stalls."""

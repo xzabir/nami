@@ -1,10 +1,12 @@
-# Nami 🌊
+<div align="center">
+  <img src="docs/cover.png" alt="Nami Cover" width="800"/>
+</div>
 
-![CI](https://github.com/nami-ai/nami/actions/workflows/ci.yml/badge.svg)
+# Nami 🌊
 
 Nami is a robust, production-grade video captioning engine built to translate sequential visual frames into highly accurate, stylistically distinct captions without falling into the hallucination traps common in generative AI.
 
-## Why Nami?
+## ✨ Why Nami?
 
 We designed Nami based on rigorous empirical testing against a comprehensive category test set, prioritizing visual fidelity and architectural reliability over aggressive prompt engineering. 
 
@@ -14,7 +16,7 @@ We designed Nami based on rigorous empirical testing against a comprehensive cat
 
 Read the details in our [Evaluation Methodology](docs/EVALUATION.md) and [Reliability & Failure Modes](docs/RELIABILITY.md) docs.
 
-## Architecture
+## 🏗 Architecture
 
 Nami runs a Two-Pass Pipeline with Pre-Emptive Fallback:
 
@@ -35,7 +37,7 @@ graph TD
 
 For a deeper dive into the reasoning behind this design, see the [Architecture Document](docs/ARCHITECTURE.md) and [Decision Log (ADR)](docs/DECISIONS.md).
 
-## Quickstart
+## 🚀 Quickstart
 
 ### Prerequisites
 
@@ -43,7 +45,7 @@ For a deeper dive into the reasoning behind this design, see the [Architecture D
 - `ffmpeg` and `ffprobe` installed and on your PATH.
 - Fireworks AI API Key (Set as `FIREWORKS_API_KEY`).
 
-### Local Execution
+### Local Execution (Batch Processing)
 
 ```bash
 # 1. Install dependencies
@@ -51,22 +53,36 @@ pip install -r requirements.txt
 
 # 2. Set environment variables
 export PYTHONPATH="$(pwd)"
+export FIREWORKS_API_KEY="<YOUR_KEY>"
 
 # 3. Run the pipeline
 python docker/entrypoint.py
 ```
 
-### Docker Execution
+### Local Execution (Web UI)
+
+Nami includes a built-in HTTP server to test video processing through a web interface.
 
 ```bash
-docker build -f docker/Dockerfile -t nami:latest .
-
-docker run -v $(pwd)/input:/input -v $(pwd)/output:/output \
-  -e FIREWORKS_API_KEY="<YOUR_KEY>" \
-  nami:latest
+export PYTHONPATH="$(pwd)"
+export FIREWORKS_API_KEY="<YOUR_KEY>"
+python web_test_server.py
 ```
+Open `http://localhost:8000` in your browser.
 
-## Documentation
+## ☁️ Hosting on Render.com
+
+Because Nami relies on `ffmpeg` (a system-level dependency), it cannot run in a standard Python environment on Render.com. **You must deploy it as a Docker Web Service.**
+
+### Render.com Deployment Steps:
+1. Create a **New Web Service** on Render and connect this GitHub repository.
+2. Under **Environment**, choose **Docker** instead of Python.
+3. In the Render Dashboard settings for this service:
+   - Set **Docker Command** to: `python web_test_server.py`
+   - Add your **Environment Variable**: `FIREWORKS_API_KEY`
+4. Render will automatically build the Docker image (which installs ffmpeg for you) and launch the Web UI on the exposed port!
+
+## 📖 Documentation
 
 - [Architecture](docs/ARCHITECTURE.md)
 - [Architecture Decision Log (ADR)](docs/DECISIONS.md)

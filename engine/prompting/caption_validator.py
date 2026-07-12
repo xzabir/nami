@@ -62,6 +62,12 @@ def validate_and_overwrite(json_text, requested_styles, placeholder, task_id, st
         if value_str == fallback_text:
             final_data[style] = fallback_text
             continue
+
+        # Reject unfilled template markers (LLM returns "..." or "…" literally)
+        if value_str in ("...", "…", "...", "____"):
+            log_event("validation", task_id, "warning", message=f"Style {style} returned unfilled template marker")
+            final_data[style] = fallback_text
+            continue
             
         # Reject duplicated style outputs
         if value_str in seen_values:

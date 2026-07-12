@@ -21,7 +21,7 @@ timeouts:
   ffmpeg: 20
   primary_vision: 18
   fallback_vision: 8
-  text_generation: 15
+  text_generation: 20
 
 retries:
   max_attempts: 3

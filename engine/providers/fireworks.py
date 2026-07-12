@@ -164,12 +164,7 @@ def call_vision_model(base64_frames, task_id, start_time):
             log_event("vision", task_id, "error", message=f"Fallback failed: {e}")
             raise RuntimeError("Both vision models failed") from e
 
-    # VERIFIER STAGE: Only if we have enough budget left before text generation
-    elapsed = time.time() - start_time
-    if elapsed < CONFIG['clip_budget_seconds'] - 8:
-        verifier_timeout = min(6.0, CONFIG['clip_budget_seconds'] - elapsed - 3.0)
-        if verifier_timeout >= 3:
-            facts = _call_vision_verifier(base64_frames, facts, verifier_timeout, task_id)
+    # Removed vision verifier to prevent hallucinations of empty JSON schemas
             
     return facts
 
@@ -184,7 +179,7 @@ def call_text_model(facts, styles, timeout, task_id, start_time):
     try:
         facts_dict = json.loads(facts)
         domain = facts_dict.get("domain", "General")
-    except:
+    except Exception:
         domain = "General"
         
     sys_prompt, user_prompt = build_text_prompt(facts, styles, domain)

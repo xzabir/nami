@@ -9,7 +9,6 @@ from engine.utils.config import CONFIG
 def extract_frames(video_url, duration, task_id, start_time):
     """Step 1b - Extract frames from video via ffmpeg network streaming."""
     with tempfile.TemporaryDirectory() as temp_dir:
-        duration_float = float(duration)
         cmd_ffmpeg = [
             "ffmpeg", "-y",
             "-i", video_url,

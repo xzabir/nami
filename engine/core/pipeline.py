@@ -40,7 +40,7 @@ def process_clip(video_url, styles, task_id):
 
         elapsed = time.time() - start_time
         remaining = CONFIG['clip_budget_seconds'] - elapsed - 2
-        text_timeout = max(8, min(CONFIG['timeouts']['text_generation'], remaining))
+        text_timeout = max(15, min(CONFIG['timeouts']['text_generation'], remaining))
         
         json_text = call_text_model(facts, styles, timeout=text_timeout, task_id=task_id, start_time=start_time)
         final_captions = validate_and_overwrite(json_text, styles, placeholder, task_id, start_time)

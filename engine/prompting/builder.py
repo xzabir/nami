@@ -41,7 +41,7 @@ def build_text_prompt(facts, styles, domain="General"):
         "You must extract the entities and events from the graph and map them directly to the stylistic persona. "
         "CRITICAL HALLUCINATION PREVENTION RULES:\n"
         "1. You MUST ONLY reference entities that exist in the 'entities' dictionary, and you MUST incorporate any relevant facts, texts, or signs listed in 'key_visual_elements'.\n"
-        "2. CONFIDENCE GATING: If a subject, event, or on-screen text has 'low' or 'medium' confidence, exclude it entirely from your caption. DO NOT mention it and DO NOT state that it is unclear. Only incorporate items with 'high' confidence.\n"
+        "2. CONFIDENCE GATING: For OCR, on-screen text, and signs: If they have 'low' or 'medium' confidence, exclude them entirely from your caption. Do not mention them. For main subjects and events, include them even if confidence is medium or low, but adjust your certainty in the description.\n"
         "3. Exaggerate the *significance* of an action, never invent the *intent* behind it.\n"
         "4. Do not introduce any entities, actions, or outcomes that are not explicitly listed in the graph.\n"
         "5. SEAMLESS CAPTIONING: DO NOT expose internal reasoning, the inference process, or image quality issues. DO NOT mention 'frames', 'sequence', 'documents', 'confidence', 'stylized filtering', 'artifacts', 'OCR', or 'unclear text'. Describe the scene naturally. If text/signs are unclear, ignore them entirely rather than stating they are unclear.\n"

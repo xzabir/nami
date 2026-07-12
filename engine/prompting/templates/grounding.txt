@@ -52,6 +52,7 @@ You MUST use EXACTLY the following JSON schema:
 
 CRITICAL RULES:
 1. PERSISTENT TRACKING: You must establish an `Entity_X` key in the `entities` dictionary for every major subject. You must use these EXACT `Entity_X` keys in the `involved_entities` list within the `events` array. Do not rediscover the same entity.
-2. NO HALLUCINATION: Only include entities and events you can clearly observe. If uncertain, mark confidence as "low" and generalize the description.
-3. OUTPUT FORMAT: Return ONLY a valid, parsable JSON object. No markdown code fences (do not wrap in ```json), no preamble, no postamble.
-4. TEMPORAL EVIDENCE FUSION: Do not let a single frame dictate confidence. Corroborate observations temporally. If OCR text or a specific object appears consistently across multiple frames, or if camera motion confirms an action, promote its `confidence` to 'high'. If it only appears once vaguely, keep it 'low' or 'medium'.
+2. EXACT SPATIAL ANCHORING: Pay forensic attention to attachment points and spatial relationships (e.g., distinguishing whether a camera is mounted on a building wall vs. a street pole). Describe the foreground vs. background hierarchies precisely.
+3. NO HALLUCINATION: Only include entities and events you can clearly observe. If uncertain, mark confidence as "low" and generalize the description.
+4. OUTPUT FORMAT: Return ONLY a valid, parsable JSON object. No markdown code fences (do not wrap in ```json), no preamble, no postamble.
+5. TEMPORAL EVIDENCE FUSION: Do not let a single frame dictate confidence. Corroborate observations temporally. If OCR text or a specific object appears consistently across multiple frames, or if camera motion confirms an action, promote its `confidence` to 'high'. If it only appears once vaguely, keep it 'low' or 'medium'.
