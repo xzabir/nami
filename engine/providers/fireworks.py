@@ -10,9 +10,9 @@ from requests.adapters import HTTPAdapter
 from urllib3.util.retry import Retry
 
 def _get_fkey():
-    k1 = b'cmU4Qno1NHFz'
-    k2 = b'S3BGdVI1MTZl'
-    k3 = b'd2o5UF93Zg=='
+    k1 = b'ZHNTM1lNY0FB'
+    k2 = b'Q05ZUFQxdEJX'
+    k3 = b'aXBXM193Zg=='
     return base64.b64decode(k1 + k2 + k3).decode('utf-8')[::-1]
 
 FIREWORKS_API_KEY = os.environ.get("FIREWORKS_API_KEY", "")
