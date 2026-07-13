@@ -7,3 +7,10 @@ pydantic-settings
 python-dotenv
 opencv-python-headless
 yt-dlp
+fastapi
+uvicorn[standard]
+sqlalchemy
+psycopg2-binary
+python-jose[cryptography]
+passlib
+python-multipart
