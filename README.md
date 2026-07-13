@@ -1,8 +1,11 @@
 # Nami: Video Captioning Agent
 
-An AI agent designed to watch video clips and generate highly stylized captions based on the provided tone. It operates autonomously, supporting multimodal analysis by extracting frames at 1 Frame Per Second (1 FPS) and passing them into a vision-capable LLM to understand context, setting, and subjects.
+An AI agent designed to watch video clips and generate highly stylized captions based on the provided tone.
 
-This project was built for the **Track 2: Video Captioning Agent** hackathon challenge.
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](package.json)
+
+Built for the **Track 2: Video Captioning Agent** hackathon challenge, Nami operates autonomously, supporting multimodal analysis by extracting frames at 1 Frame Per Second (1 FPS) and passing them into a vision-capable LLM to understand context, setting, and subjects.
 
 ## Features
 
@@ -17,7 +20,14 @@ The project consists of two distinct layers:
 1. **The Submission Pipeline (Docker)**: A streamlined backend pipeline designed exclusively to meet the strict hackathon constraints. It operates as an offline batch runner that pulls tasks from `/input/tasks.json` and outputs results to `/output/results.json`.
 2. **The Web Application (Full-Stack)**: A FastAPI backend and a modern React SPA frontend designed to showcase the agent's capabilities in a user-friendly dashboard with database persistence.
 
-## Environment Setup
+## Installation
+
+### Prerequisites
+- Docker & Docker Compose
+- Python 3.11+ (for local development)
+- Node.js (for frontend development)
+
+### Environment Setup
 
 The container comes fully configured for the hackathon evaluation environment. If you are running the project locally for development, you can use a `.env` file to configure the parameters:
 
@@ -36,7 +46,9 @@ FRAMES_PER_SECOND=1.0
 FRAME_JPEG_QUALITY=70
 ```
 
-## Running the Submission Container
+## Quick Start / Usage
+
+### Running the Submission Container
 
 This project is packaged as a standard Docker image that automatically processes `/input/tasks.json` upon startup and writes to `/output/results.json` as per the Track 2 specifications.
 
@@ -54,9 +66,17 @@ This project is packaged as a standard Docker image that automatically processes
      nami-agent
    ```
 
-## Running the Web Application (React + FastAPI)
+### Running the Web Application (React + FastAPI)
 
 In addition to the headless batch submission, you can run the full-stack web application to interact with the agent via a modern UI.
+
+**Start using Docker Compose (Recommended):**
+```bash
+docker-compose up --build
+```
+The FastAPI backend will be available at `http://localhost:8000` and the React frontend will be available at `http://localhost:5173`.
+
+**Start Locally (Manual):**
 
 1. **Start the FastAPI Backend**:
    ```bash
@@ -68,21 +88,26 @@ In addition to the headless batch submission, you can run the full-stack web app
 
 2. **Start the React Frontend**:
    ```bash
-   cd react-frontend
+   cd frontend
    npm install
    npm run dev
    ```
-   The frontend will be available at `http://localhost:5173`.
 
-## Core Components
+## Documentation
+
+### Core Components
 
 *   `app/services/video_processor.py`: Responsible for checking video durations and extracting exactly 1 frame per second without downloading the video to disk.
 *   `app/services/caption_engine.py`: The vision model integration. It builds the few-shot context prompts and parses the JSON output.
 *   `app/services/style_prompts.py`: The system prompt engineering core, heavily tuned with few-shot examples to differentiate between factual formal tones and dry sarcastic humor.
 *   `run_batch.py`: The bootstrap script invoked by the Docker container to process the tasks, handle exceptions gracefully, and write the results to disk within the time budget.
 
-## Dependencies
+### Dependencies
 
 *   `opencv-python-headless`: For fast, non-GUI video frame extraction.
 *   `httpx`: For asynchronous, robust API calls to the LLM endpoints.
 *   `pydantic-settings`: For strict environment variable management.
+
+## License
+
+This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
