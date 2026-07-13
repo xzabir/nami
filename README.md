@@ -1,113 +1,88 @@
-# Nami: Video Captioning Agent
+<div align="center">
+  <h1>🌊 Nami</h1>
+  <p><strong>A Minimalist, High-Performance Video Captioning Agent</strong></p>
+  <p>
+    <a href="LICENSE"><img src="https://img.shields.io/badge/License-MIT-black.svg" alt="License" /></a>
+    <img src="https://img.shields.io/badge/Track-2_Agent-black.svg" alt="Track 2" />
+    <img src="https://img.shields.io/badge/Model-Gemma_3-black.svg" alt="Model" />
+  </p>
+  <br />
+</div>
 
-An AI agent designed to watch video clips and generate highly stylized captions based on the provided tone.
+## 📖 The Vision
 
-[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
-[![Version](https://img.shields.io/badge/version-1.0.0-green.svg)](package.json)
+**Nami** is an intelligent vision agent built from the ground up for the **AMD Developer Hackathon (Track 2)**. Instead of taking a shotgun approach to video analysis, Nami relies on surgical precision: she watches a video at exactly 1 Frame Per Second, passing a dense visual context array to the Gemma 3 vision model to generate four distinct caption styles in a single, lightning-fast inference pass.
 
-Built for the **Track 2: Video Captioning Agent** hackathon challenge, Nami operates autonomously, supporting multimodal analysis by extracting frames at 1 Frame Per Second (1 FPS) and passing them into a vision-capable LLM to understand context, setting, and subjects.
+The result? Unmatched consistency across formal, sarcastic, and humorous styles, all while strictly adhering to a 10-minute maximum runtime budget for bulk video processing.
 
-## Features
+---
 
-- **Agent-Based Architecture**: Automatically ingests URLs (direct video links or cloud storage).
-- **1 Frame Per Second Extraction**: Dynamically calculates the duration of a clip and strictly pulls 1 FPS for contextually dense vision-grounding, avoiding arbitrary frame caps.
-- **Strict Budget Tracking**: A global wall-clock monitor ensures the batch processor never exceeds the 10-minute maximum runtime, guaranteeing successful exit codes.
-- **Single-Pass Stylization**: To respect tight latency budgets (under 30s per request), the agent prompts the LLM to generate all four required caption styles (`formal`, `sarcastic`, `humorous_tech`, `humorous_non_tech`) simultaneously in a single structured JSON response.
+## ⚡ What Makes Nami Different?
 
-## Architecture
+Unlike standard wrappers around AI endpoints, Nami is engineered for resilience and visual excellence:
 
-The project consists of two distinct layers:
-1. **The Submission Pipeline (Docker)**: A streamlined backend pipeline designed exclusively to meet the strict hackathon constraints. It operates as an offline batch runner that pulls tasks from `/input/tasks.json` and outputs results to `/output/results.json`.
-2. **The Web Application (Full-Stack)**: A FastAPI backend and a modern React SPA frontend designed to showcase the agent's capabilities in a user-friendly dashboard with database persistence.
+- **Surgical Frame Extraction:** Dynamic duration calculation ensures we grab exactly what we need (1 FPS) directly from the stream without hoarding disk space.
+- **Concurrent Batch Processing:** The offline evaluation runner utilizes a ThreadPoolExecutor to process multiple video tasks in parallel, safely guarding against timeouts.
+- **Single-Pass Stylization:** Why make four API calls when you can make one? Nami requests `formal`, `sarcastic`, `humorous_tech`, and `humorous_non_tech` all at once via a heavily tuned, few-shot JSON schema prompt.
+- **Dual Architecture:** Nami serves both as an isolated, headless batch processor (for the judges) and a sleek, minimalist full-stack web application (for humans).
 
-## Installation
+---
 
-### Prerequisites
-- Docker & Docker Compose
-- Python 3.11+ (for local development)
-- Node.js (for frontend development)
+## 🚀 Running Nami
 
-### Environment Setup
+Nami offers two operational modes depending on your needs.
 
-The container comes fully configured for the hackathon evaluation environment. If you are running the project locally for development, you can use a `.env` file to configure the parameters:
+### Mode A: The Headless Batch Runner (Hackathon Evaluation)
 
-```env
-# Fireworks AI Credentials
-FIREWORKS_API_KEY=your_fireworks_key_here
-FIREWORKS_BASE_URL=https://api.fireworks.ai/inference/v1
+This is the exact setup required by the hackathon judges. It reads tasks from an input directory and outputs strict JSON.
 
-# AI Model Selection
-GEMMA_MODEL_ID=accounts/fireworks/models/minimax-m3
+1. **Build the Engine** (Apple Silicon users: use `--platform linux/amd64`)
+   ```bash
+   docker buildx build -f Dockerfile.submission -t nami-eval .
+   ```
+2. **Execute the Batch**
+   ```bash
+   docker run --rm \
+     -v $(pwd)/input:/input \
+     -v $(pwd)/output:/output \
+     nami-eval
+   ```
 
-# Video Processing Constraints
+### Mode B: The Minimalist Web Application
+
+Experience Nami through our beautifully designed, glassmorphic React frontend powered by a robust FastAPI + PostgreSQL backend.
+
+1. **Spin up the stack**:
+   ```bash
+   docker-compose up --build
+   ```
+2. **Interact**: 
+   - Open `http://localhost:5173` to view the stunning minimalist frontend.
+   - Open `http://localhost:8000/docs` to view the interactive API documentation.
+
+---
+
+## 🛠 Under the Hood
+
+### Environment Configuration
+Whether you are running locally or via Docker, Nami respects standard `.env` variables for seamless integration:
+
+```ini
+FIREWORKS_API_KEY=your_key_here
 MIN_VIDEO_SECONDS=2
 MAX_VIDEO_SECONDS=300
 FRAMES_PER_SECOND=1.0
-FRAME_JPEG_QUALITY=70
+FRAME_JPEG_QUALITY=80
 ```
 
-## Quick Start / Usage
+### Core Stack
+- **Vision Inference**: `httpx` and `accounts/fireworks/models/minimax-m3`
+- **Video Extraction**: `opencv-python-headless`
+- **Backend API**: FastAPI, Uvicorn, SQLAlchemy
+- **Frontend UI**: React, Vite, Custom Glassmorphism CSS
 
-### Running the Submission Container
+---
 
-This project is packaged as a standard Docker image that automatically processes `/input/tasks.json` upon startup and writes to `/output/results.json` as per the Track 2 specifications.
-
-1. **Build the image**:
-   *(Apple Silicon users must include `--platform linux/amd64`)*
-   ```bash
-   docker buildx build --platform linux/amd64 -f Dockerfile.submission -t nami-agent .
-   ```
-
-2. **Run locally**:
-   ```bash
-   docker run --rm \
-     -v $(pwd)/test_input.json:/input/tasks.json \
-     -v $(pwd)/test_output.json:/output/results.json \
-     nami-agent
-   ```
-
-### Running the Web Application (React + FastAPI)
-
-In addition to the headless batch submission, you can run the full-stack web application to interact with the agent via a modern UI.
-
-**Start using Docker Compose (Recommended):**
-```bash
-docker-compose up --build
-```
-The FastAPI backend will be available at `http://localhost:8000` and the React frontend will be available at `http://localhost:5173`.
-
-**Start Locally (Manual):**
-
-1. **Start the FastAPI Backend**:
-   ```bash
-   python -m venv venv
-   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
-   pip install -r requirements.txt
-   uvicorn app.main:app --reload --port 8000
-   ```
-
-2. **Start the React Frontend**:
-   ```bash
-   cd frontend
-   npm install
-   npm run dev
-   ```
-
-## Documentation
-
-### Core Components
-
-*   `app/services/video_processor.py`: Responsible for checking video durations and extracting exactly 1 frame per second without downloading the video to disk.
-*   `app/services/caption_engine.py`: The vision model integration. It builds the few-shot context prompts and parses the JSON output.
-*   `app/services/style_prompts.py`: The system prompt engineering core, heavily tuned with few-shot examples to differentiate between factual formal tones and dry sarcastic humor.
-*   `run_batch.py`: The bootstrap script invoked by the Docker container to process the tasks, handle exceptions gracefully, and write the results to disk within the time budget.
-
-### Dependencies
-
-*   `opencv-python-headless`: For fast, non-GUI video frame extraction.
-*   `httpx`: For asynchronous, robust API calls to the LLM endpoints.
-*   `pydantic-settings`: For strict environment variable management.
-
-## License
-
-This project is licensed under the MIT License - see the [LICENSE](LICENSE) file for details.
+<div align="center">
+  <p><i>Crafted for the AMD Developer Hackathon.</i></p>
+</div>
