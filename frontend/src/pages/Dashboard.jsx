@@ -97,7 +97,6 @@ export default function Dashboard() {
         setVideoUrl('');
       }
       
-      // Instantly trigger a refresh instead of waiting for the poll
       const newJobs = await apiRequest('/captions');
       setJobs(newJobs);
     } catch (err) {
@@ -128,45 +127,52 @@ export default function Dashboard() {
     }
   };
 
-  const getStatusLabel = (status) => {
-    if (status === 'pending') return <><span className="spinner"></span>Queued</>;
-    if (status === 'processing') return <><span className="spinner"></span>Captioning</>;
-    if (status === 'done') return 'Done';
-    if (status === 'failed') return 'Failed';
-    if (status === 'cancelled') return 'Cancelled';
-    return status;
+  const getStatusBadge = (status) => {
+    if (status === 'pending') return <span className="badge badge-neutral"><span className="spinner" style={{ width: '10px', height: '10px', marginRight: '6px' }}></span>Queued</span>;
+    if (status === 'processing') return <span className="badge badge-neutral" style={{ borderColor: 'var(--accent)', color: 'var(--accent)' }}><span className="spinner" style={{ width: '10px', height: '10px', marginRight: '6px' }}></span>Captioning</span>;
+    if (status === 'done') return <span className="badge badge-success">Done</span>;
+    if (status === 'failed') return <span className="badge badge-danger">Failed</span>;
+    if (status === 'cancelled') return <span className="badge badge-neutral">Cancelled</span>;
+    return <span className="badge badge-neutral">{status}</span>;
   };
 
   return (
     <>
-      <div className="dash-header">
-        <div className="brand"><span className="dot"></span> Nami</div>
-        <div className="nav-links">
-          <span style={{ fontFamily: 'var(--font-mono)', fontSize: '0.8rem', color: 'var(--paper-dim)' }}>
-            {userEmail}
-          </span>
-          <button className="btn btn-ghost" onClick={handleLogout}>Log out</button>
+      <nav className="nav container mb-8">
+        <div className="flex items-center justify-between">
+          <div className="brand">
+            <span className="dot"></span> Nami
+          </div>
+          <div className="flex items-center gap-6">
+            <span className="font-mono text-xs text-muted">
+              {userEmail}
+            </span>
+            <button className="btn btn-ghost text-sm" onClick={handleLogout}>Log out</button>
+          </div>
         </div>
-      </div>
+      </nav>
 
-      <main className="dash-body">
-        <section className="submit-panel">
+      <main className="container">
+        <section className="card mb-12">
           <h2>Submit a clip</h2>
-          <p className="hint">Upload a video from your device or paste a direct video URL (30s–2min works best). Fireworks AI will sample frames and write all four styles in one pass.</p>
+          <p className="text-muted text-sm mb-6">
+            Upload a video from your device or paste a direct video URL (30s–2min works best). Fireworks AI will sample frames and write all four styles in one pass.
+          </p>
           
-          {submitError && <div className="form-msg error">{submitError}</div>}
+          {submitError && <div className="mb-4 text-sm" style={{ color: 'var(--danger)' }}>{submitError}</div>}
           
-          <div className="submit-row upload-container">
-            <div className="input-group">
+          <div className="flex flex-col gap-4">
+            <div className="flex items-center gap-4 flex-wrap">
               <input 
                 type="url" 
+                className="input flex-1"
                 placeholder="https://storage.example.com/clips/clip1.mp4" 
                 value={videoUrl}
                 onChange={handleUrlChange}
               />
-              <span className="or-separator">OR</span>
-              <button type="button" className="btn btn-ghost file-label" onClick={handleFileClick}>
-                <span className="file-icon">📁</span> Choose File
+              <span className="font-mono text-xs uppercase text-muted">OR</span>
+              <button type="button" className="btn btn-outline" onClick={handleFileClick}>
+                Choose File
               </button>
               <input 
                 type="file" 
@@ -175,57 +181,63 @@ export default function Dashboard() {
                 ref={fileInputRef}
                 onChange={handleFileChange}
               />
-              <span className="file-name-display">
-                {selectedFile ? selectedFile.name : 'No file chosen'}
-              </span>
+              {selectedFile && (
+                <span className="font-mono text-xs text-muted truncate" style={{ maxWidth: '200px' }}>
+                  {selectedFile.name}
+                </span>
+              )}
             </div>
-            <button className="btn btn-primary" onClick={handleSubmit} disabled={isSubmitting}>
+            <button className="btn btn-primary" style={{ alignSelf: 'flex-start' }} onClick={handleSubmit} disabled={isSubmitting}>
               {isSubmitting ? 'Submitting…' : 'Generate captions'}
             </button>
           </div>
         </section>
 
-        <div className="jobs-head">
+        <div className="flex justify-between items-baseline mb-6">
           <h2>Your clips</h2>
-          <span>{jobs.length} clip{jobs.length !== 1 && 's'}</span>
+          <span className="font-mono text-xs text-muted">{jobs.length} clip{jobs.length !== 1 && 's'}</span>
         </div>
 
-        <div>
+        <div className="flex flex-col gap-6">
           {jobs.length === 0 ? (
-            <div className="empty-state">
-              <h3>No clips yet</h3>
-              <p>Upload a video or paste a URL above to get your first four takes.</p>
+            <div className="card text-center py-12" style={{ borderStyle: 'dashed' }}>
+              <h3 className="mb-2">No clips yet</h3>
+              <p className="text-muted text-sm">Upload a video or paste a URL above to get your first four takes.</p>
             </div>
           ) : (
             jobs.map(job => (
-              <div key={job.id} className="job-card">
-                <div className="job-top">
-                  <div className="job-url">{job.video_url}</div>
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '8px' }}>
-                    <span className={`status-pill status-${job.status}`}>
-                      {getStatusLabel(job.status)}
-                    </span>
+              <div key={job.id} className="card" style={{ padding: '24px' }}>
+                <div className="flex justify-between items-start flex-wrap gap-4 mb-6">
+                  <div className="font-mono text-sm" style={{ wordBreak: 'break-all', maxWidth: '70ch' }}>
+                    {job.video_url}
+                  </div>
+                  <div className="flex items-center gap-3">
+                    {getStatusBadge(job.status)}
                     {(job.status === 'pending' || job.status === 'processing') ? (
-                      <button className="btn btn-ghost btn-xs cancel-btn" onClick={() => handleCancel(job.id)}>Stop</button>
+                      <button className="btn btn-ghost text-xs py-1 px-2" onClick={() => handleCancel(job.id)}>Stop</button>
                     ) : (
-                      <button className="btn btn-ghost btn-xs delete-btn" style={{ color: 'var(--rec)', borderColor: 'rgba(194,91,69,0.3)' }} onClick={() => handleDelete(job.id)}>Delete</button>
+                      <button className="btn btn-ghost text-xs py-1 px-2" style={{ color: 'var(--danger)' }} onClick={() => handleDelete(job.id)}>Delete</button>
                     )}
                   </div>
                 </div>
                 
                 {job.captions && (
-                  <div className="caption-grid">
+                  <div className="grid grid-cols-2 gap-4">
                     {Object.entries(job.captions).map(([style, text]) => (
-                      <div key={style} className="caption-item">
-                        <div className="tag">{STYLE_LABELS[style] || style}</div>
-                        <div className="text">{text || <span style={{ color: 'var(--paper-dim)' }}>No caption generated</span>}</div>
+                      <div key={style} className="p-4 rounded-lg" style={{ background: 'var(--bg)', border: '1px solid var(--border)', borderRadius: '8px', padding: '16px' }}>
+                        <div className="font-mono text-xs uppercase mb-2" style={{ color: 'var(--accent)', letterSpacing: '0.05em' }}>
+                          {STYLE_LABELS[style] || style}
+                        </div>
+                        <div className="text-sm">
+                          {text || <span className="text-muted">No caption generated</span>}
+                        </div>
                       </div>
                     ))}
                   </div>
                 )}
                 
                 {job.error && (
-                  <p style={{ marginTop: '12px', fontSize: '0.85rem', color: '#E8998A' }}>{job.error}</p>
+                  <p className="mt-4 text-sm" style={{ color: 'var(--danger)' }}>{job.error}</p>
                 )}
               </div>
             ))

@@ -1,79 +1,76 @@
-import React, { useState, useEffect } from 'react';
-import { Link, useNavigate } from 'react-router-dom';
-import { apiRequest, setToken, getToken } from '../api';
+import React, { useState } from 'react';
+import { useNavigate, Link } from 'react-router-dom';
+import { apiRequest, setToken } from '../api';
 
 export default function Login() {
+  const navigate = useNavigate();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
-  const [errorMsg, setErrorMsg] = useState('');
-  const [successMsg, setSuccessMsg] = useState('');
-  const [loading, setLoading] = useState(false);
-  const navigate = useNavigate();
-
-  useEffect(() => {
-    if (getToken()) navigate('/dashboard');
-  }, [navigate]);
+  const [error, setError] = useState('');
 
   const handleSubmit = async (e) => {
     e.preventDefault();
-    setErrorMsg('');
-    setSuccessMsg('');
-    setLoading(true);
-
+    setError('');
+    
     try {
-      const result = await apiRequest('/auth/login', {
+      const formData = new URLSearchParams();
+      formData.append('username', email);
+      formData.append('password', password);
+
+      const res = await apiRequest('/auth/token', {
         method: 'POST',
-        auth: false,
-        body: { email, password },
+        headers: { 'Content-Type': 'application/x-www-form-urlencoded' },
+        body: formData.toString(),
       });
-      setToken(result.access_token);
-      setSuccessMsg('Success — redirecting…');
+      
+      setToken(res.access_token);
       navigate('/dashboard');
     } catch (err) {
-      setErrorMsg(err.message || 'Something went wrong');
-    } finally {
-      setLoading(false);
+      setError(err.message || 'Login failed');
     }
   };
 
   return (
-    <div className="auth-shell">
-      <div className="auth-card">
-        <div className="brand"><span className="dot"></span> Nami</div>
-        <h1>Log back in</h1>
-        <p className="sub">Pick up where you left off</p>
+    <div className="flex items-center justify-center min-h-screen px-4" style={{ minHeight: '100vh' }}>
+      <div className="card w-full" style={{ maxWidth: '400px' }}>
+        <div className="flex justify-center mb-6">
+          <div className="brand">
+            <span className="dot"></span> Nami
+          </div>
+        </div>
+        
+        <h1 className="text-center text-2xl mb-2">Welcome back</h1>
+        <p className="text-center text-sm text-muted mb-8">Sign in to your account</p>
 
-        {errorMsg && <div className="form-msg error">{errorMsg}</div>}
-        {successMsg && <div className="form-msg success">{successMsg}</div>}
+        {error && <div className="mb-6 text-sm text-center p-3 rounded" style={{ background: 'var(--danger-bg)', color: 'var(--danger)' }}>{error}</div>}
 
-        <form onSubmit={handleSubmit}>
-          <div className="field">
-            <label htmlFor="email">Email</label>
+        <form onSubmit={handleSubmit} className="flex flex-col gap-4">
+          <div>
+            <label className="label">Email address</label>
             <input 
               type="email" 
-              id="email" 
+              className="input"
+              value={email} 
+              onChange={e => setEmail(e.target.value)} 
               required 
-              value={email}
-              onChange={(e) => setEmail(e.target.value)}
             />
           </div>
-          <div className="field">
-            <label htmlFor="password">Password</label>
+          <div>
+            <label className="label">Password</label>
             <input 
               type="password" 
-              id="password" 
+              className="input"
+              value={password} 
+              onChange={e => setPassword(e.target.value)} 
               required 
-              value={password}
-              onChange={(e) => setPassword(e.target.value)}
             />
           </div>
-          <button type="submit" className="btn btn-primary btn-block" disabled={loading}>
-            {loading ? 'Logging in…' : 'Log in'}
-          </button>
+          
+          <button type="submit" className="btn btn-primary mt-2">Sign In</button>
         </form>
 
-        <div className="auth-switch">
-          Don't have an account? <Link to="/signup">Sign up</Link>
+        <div className="text-center mt-6 text-sm text-muted">
+          Don't have an account? <Link to="/signup" style={{ fontWeight: '500' }}>Sign up</Link>
         </div>
       </div>
     </div>
