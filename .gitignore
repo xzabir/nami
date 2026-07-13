@@ -1,11 +1,9 @@
-# Byte-compiled / optimized / DLL files
+venv/
 __pycache__/
-*.py[cod]
-*$py.class
-
-# Mac OS files
-.DS_Store
-
-# Output files
-output/results.json
-*.tmp
+*.pyc
+.env
+.pytest_cache/
+uploads/
+test_output.json
+test_output_all.json
+scratch/

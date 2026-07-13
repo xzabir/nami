@@ -1,0 +1,29 @@
+[
+  {
+    "task_id": "v1",
+    "captions": {
+      "formal": "The scene depicts an urban arterial road in a South Korean city during autumn, captured from an elevated, static vantage point overlooking a multi-lane intersection. Mixed vehicular traffic \u2014 including sedans, SUVs, taxis, and commercial box trucks \u2014 flows bidirectionally under green traffic signals, with cross-traffic merging from the left. The composition is spatially layered: golden-foliaged trees line the avenue, high-rise apartment buildings occupy the midground, and mountains define the distant horizon, establishing a clear urban-to-natural hierarchy. Motion-blurred vehicles indicate sustained traffic throughput, while the sidewalks remain entirely unoccupied.",
+      "sarcastic": "What a truly historic moment \u2014 cars driving down a road in Korea during autumn, as if civilization has finally reached its absolute zenith. The traffic lights heroically display green, a feat of municipal engineering that surely deserves a national holiday. Meanwhile, motion-blurred vehicles streak past with all the epic grandeur of a Tuesday afternoon commute, and the trees have the audacity to change colors like they do every single year without fail.",
+      "humorous_tech": "The urban traffic router is processing packets at full bandwidth, with vehicles executing bidirectional flow control through the intersection node while green lights act as the load balancer. Box trucks and sedans handle their respective payload delivery across multiple lanes, and the autumn foliage cache has clearly refreshed with a golden color palette update. Background mountains render at approximately LOD level 3, and the pedestrian sidewalk threads appear to have zero active connections.",
+      "humorous_non_tech": "An absolutely earth-shattering afternoon in Korea where cars are doing the unthinkable \u2014 driving on a road while trees change colors like it's autumn or something. The sheer audacity of traffic flowing through an intersection under green lights is truly a sight no one has ever witnessed before."
+    }
+  },
+  {
+    "task_id": "v2",
+    "captions": {
+      "formal": "A densely wooded forest scene is rendered with a pronounced painterly aesthetic, where dappled sunlight filters through the canopy onto the forest floor. At the center of the composition, a feline figure is integrated into the arboreal background, its form\u2014distinguished by pointed ears, prominent eyes, and whiskers\u2014shifting subtly in orientation across the sequence. The surrounding tree trunks maintain consistent spatial positioning, indicating a largely static camera while the central subject executes minor rotational head movements. The overall visual hierarchy places the feline as the primary focal point, with the textured foliage serving as both context and camouflage.",
+      "sarcastic": "A cat graces the forest with its presence, performing the monumentally epic act of turning its head slightly\u2014truly a feat that will echo through the ages of feline achievement. The trees stand witness to this barely perceptible rotation, no doubt forever changed by witnessing such a historically significant shift in facial orientation. The sunlight filters down as though even nature itself needed proper lighting for this momentous occasion.",
+      "humorous_tech": "The forest renderer is running a heavy painterly shader that's blending the cat sprite directly into the tree texture atlas\u2014seamless compositing, honestly. The feline process is executing a slow head-rotation subroutine across the frame buffer, barely taxing the GPU but definitely keeping the main thread busy. Meanwhile, the static camera transform confirms nobody touched the input pipeline during render.",
+      "humorous_non_tech": "A cat is out here playing hide-and-seek with an entire forest and honestly winning, just casually shifting its head like it's auditioning for a slow-motion nature documentary. The trees are absolutely shook."
+    }
+  },
+  {
+    "task_id": "v3",
+    "captions": {
+      "formal": "A woman is seated at a desk in an indoor office or computer lab environment, engaged in sustained keyboard input while facing a workstation. A large monitor occupies the right foreground, partially framing the composition, with a computer mouse and keyboard positioned on the desk surface in front of her. The background features potted plants and overhead ceiling lights, indicating a well-lit, organized workspace designed for individual productivity. The camera maintains a low, desk-level perspective with a subtle lateral pan, reinforcing the observational nature of the scene.",
+      "sarcastic": "Truly a momentous occasion for human civilization: a woman pressing small plastic squares in a rhythmic pattern, an act that will surely be commemorated in the grand annals of history. The monitor looms in the foreground like a monolithic witness to this legendary display of seated productivity. Meanwhile, the plants in the background stand as silent sentinels, deeply honored to observe such an earth-shattering commitment to typing.",
+      "humorous_tech": "The user appears to be executing a sustained brute-force keyboard input protocol, hammering away at the peripheral interface while the primary display renders a dark screen\u2014possibly awaiting a payload that hasn't compiled yet. Background processes include ambient plant photosynthesis and overhead lighting drawing steady power from the grid. The camera performs a slow lateral pan, as if buffering the next frame of this real-time workstation session.",
+      "humorous_non_tech": "This woman is absolutely demolishing that keyboard like it owes her money, locked in an epic battle with a screen that's just sitting there in the dark. The plants are watching. They're impressed."
+    }
+  }
+]

@@ -1,90 +1,88 @@
-<div align="center">
-  <img src="docs/cover.png" alt="Nami Cover" width="800"/>
-</div>
+# Nami: Video Captioning Agent
 
-# Nami 🌊
+An AI agent designed to watch video clips and generate highly stylized captions based on the provided tone. It operates autonomously, supporting multimodal analysis by extracting frames at 1 Frame Per Second (1 FPS) and passing them into a vision-capable LLM to understand context, setting, and subjects.
 
-Nami is a robust, production-grade video captioning engine built to translate sequential visual frames into highly accurate, stylistically distinct captions without falling into the hallucination traps common in generative AI.
+This project was built for the **Track 2: Video Captioning Agent** hackathon challenge.
 
-## ✨ Why Nami?
+## Features
 
-We designed Nami based on rigorous empirical testing against a comprehensive category test set, prioritizing visual fidelity and architectural reliability over aggressive prompt engineering. 
+- **Agent-Based Architecture**: Automatically ingests URLs (direct video links or cloud storage).
+- **1 Frame Per Second Extraction**: Dynamically calculates the duration of a clip and strictly pulls 1 FPS for contextually dense vision-grounding, avoiding arbitrary frame caps.
+- **Strict Budget Tracking**: A global wall-clock monitor ensures the batch processor never exceeds the 10-minute maximum runtime, guaranteeing successful exit codes.
+- **Single-Pass Stylization**: To respect tight latency budgets (under 30s per request), the agent prompts the LLM to generate all four required caption styles (`formal`, `sarcastic`, `humorous_tech`, `humorous_non_tech`) simultaneously in a single structured JSON response.
 
-- **Decoupled Architecture:** Nami isolates visual extraction from persona-based styling. A vision model produces a strictly factual ledger, and a separate text model adopts the requested personas (Formal, Sarcastic, Humorous Tech, Humorous Non-Tech). This strictly prevents the system from inventing non-existent details just to service a joke.
-- **Fail-Safe Reliability:** Nami is aggressively instrumented with hard subprocess timeouts for ffmpeg, dynamic LLM API timeouts that strictly adhere to a 30s/clip budget, and a placeholder-first guarantee. If any stage crashes, a valid fallback response is already on disk.
-- **Per-Style Partial Credit:** Our validation system checks each generated style independently. If one style fails length limits or hallucinates, only that style falls back—saving valid captions from being unnecessarily discarded.
+## Architecture
 
-Read the details in our [Evaluation Methodology](docs/EVALUATION.md) and [Reliability & Failure Modes](docs/RELIABILITY.md) docs.
+The project consists of two distinct layers:
+1. **The Submission Pipeline (Docker)**: A streamlined backend pipeline designed exclusively to meet the strict hackathon constraints. It operates as an offline batch runner that pulls tasks from `/input/tasks.json` and outputs results to `/output/results.json`.
+2. **The Web Application (Full-Stack)**: A FastAPI backend and a modern React SPA frontend designed to showcase the agent's capabilities in a user-friendly dashboard with database persistence.
 
-## 🏗 Architecture
+## Environment Setup
 
-Nami runs a Two-Pass Pipeline with Pre-Emptive Fallback:
+The container comes fully configured for the hackathon evaluation environment. If you are running the project locally for development, you can use a `.env` file to configure the parameters:
 
-```mermaid
-graph TD
-    A[Task Initialized] --> B(Write Fallback Placeholders)
-    B --> C[Extract Frames via ffmpeg]
-    C --> D{Vision Grounding Call}
-    D -- Timeout / Error --> E[Fallback Vision Model]
-    E -- Error --> F[Keep Placeholders]
-    D -- Success --> G[Structured Factual JSON Ledger]
-    E -- Success --> G
-    G --> H{Text Styling Call}
-    H -- Success --> I[Per-Style Validation]
-    I --> J[Overwrite Valid Styles]
-    H -- Error --> F
+```env
+# Fireworks AI Credentials
+FIREWORKS_API_KEY=your_fireworks_key_here
+FIREWORKS_BASE_URL=https://api.fireworks.ai/inference/v1
+
+# AI Model Selection
+GEMMA_MODEL_ID=accounts/fireworks/models/minimax-m3
+
+# Video Processing Constraints
+MIN_VIDEO_SECONDS=2
+MAX_VIDEO_SECONDS=300
+FRAMES_PER_SECOND=1.0
+FRAME_JPEG_QUALITY=70
 ```
 
-For a deeper dive into the reasoning behind this design, see the [Architecture Document](docs/ARCHITECTURE.md) and [Decision Log (ADR)](docs/DECISIONS.md).
+## Running the Submission Container
 
-## 🚀 Quickstart
+This project is packaged as a standard Docker image that automatically processes `/input/tasks.json` upon startup and writes to `/output/results.json` as per the Track 2 specifications.
 
-### Prerequisites
+1. **Build the image**:
+   *(Apple Silicon users must include `--platform linux/amd64`)*
+   ```bash
+   docker buildx build --platform linux/amd64 -f Dockerfile.submission -t nami-agent .
+   ```
 
-- Python 3.11+
-- `ffmpeg` and `ffprobe` installed and on your PATH.
-- Fireworks AI API Key (Set as `FIREWORKS_API_KEY`).
+2. **Run locally**:
+   ```bash
+   docker run --rm \
+     -v $(pwd)/test_input.json:/input/tasks.json \
+     -v $(pwd)/test_output.json:/output/results.json \
+     nami-agent
+   ```
 
-### Local Execution (Batch Processing)
+## Running the Web Application (React + FastAPI)
 
-```bash
-# 1. Install dependencies
-pip install -r requirements.txt
+In addition to the headless batch submission, you can run the full-stack web application to interact with the agent via a modern UI.
 
-# 2. Set environment variables
-export PYTHONPATH="$(pwd)"
-export FIREWORKS_API_KEY="<YOUR_KEY>"
+1. **Start the FastAPI Backend**:
+   ```bash
+   python -m venv venv
+   source venv/bin/activate  # On Windows use `venv\Scripts\activate`
+   pip install -r requirements.txt
+   uvicorn app.main:app --reload --port 8000
+   ```
 
-# 3. Run the pipeline
-python docker/entrypoint.py
-```
+2. **Start the React Frontend**:
+   ```bash
+   cd react-frontend
+   npm install
+   npm run dev
+   ```
+   The frontend will be available at `http://localhost:5173`.
 
-### Local Execution (Web UI)
+## Core Components
 
-Nami includes a built-in HTTP server to test video processing through a web interface.
+*   `app/services/video_processor.py`: Responsible for checking video durations and extracting exactly 1 frame per second without downloading the video to disk.
+*   `app/services/caption_engine.py`: The vision model integration. It builds the few-shot context prompts and parses the JSON output.
+*   `app/services/style_prompts.py`: The system prompt engineering core, heavily tuned with few-shot examples to differentiate between factual formal tones and dry sarcastic humor.
+*   `run_batch.py`: The bootstrap script invoked by the Docker container to process the tasks, handle exceptions gracefully, and write the results to disk within the time budget.
 
-```bash
-export PYTHONPATH="$(pwd)"
-export FIREWORKS_API_KEY="<YOUR_KEY>"
-python web_test_server.py
-```
-Open `http://localhost:8000` in your browser.
+## Dependencies
 
-## ☁️ Hosting on Render.com
-
-Because Nami relies on `ffmpeg` (a system-level dependency), it cannot run in a standard Python environment on Render.com. **You must deploy it as a Docker Web Service.**
-
-### Render.com Deployment Steps:
-1. Create a **New Web Service** on Render and connect this GitHub repository.
-2. Under **Environment**, choose **Docker** instead of Python.
-3. In the Render Dashboard settings for this service:
-   - Set **Docker Command** to: `python web_test_server.py`
-   - Add your **Environment Variable**: `FIREWORKS_API_KEY`
-4. Render will automatically build the Docker image (which installs ffmpeg for you) and launch the Web UI on the exposed port!
-
-## 📖 Documentation
-
-- [Architecture](docs/ARCHITECTURE.md)
-- [Architecture Decision Log (ADR)](docs/DECISIONS.md)
-- [Evaluation & Test Results](docs/EVALUATION.md)
-- [Reliability & Failure Modes](docs/RELIABILITY.md)
+*   `opencv-python-headless`: For fast, non-GUI video frame extraction.
+*   `httpx`: For asynchronous, robust API calls to the LLM endpoints.
+*   `pydantic-settings`: For strict environment variable management.

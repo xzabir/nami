@@ -1,0 +1,30 @@
+FROM python:3.11-slim
+
+RUN apt-get update && apt-get install -y --no-install-recommends \
+    ffmpeg \
+    && rm -rf /var/lib/apt/lists/* \
+    && apt-get clean
+
+# Changed to workspace to prevent the /app/app Python module confusion
+WORKDIR /workspace
+
+COPY requirements-submission.txt .
+RUN pip install --no-cache-dir -r requirements-submission.txt
+
+# Copy the entire app directory structurally intact
+COPY app ./app
+COPY run_batch.py .
+
+# WARNING: The judging VM does NOT inject API keys. 
+# You MUST put your real Fireworks API key here before running `docker build`
+# and pushing to a public registry for the judges.
+ENV FIREWORKS_API_KEY="INSERT_YOUR_FIREWORKS_KEY_HERE"
+
+ENV MIN_VIDEO_SECONDS=2
+ENV MAX_VIDEO_SECONDS=300
+ENV FRAMES_PER_SECOND=1.0
+ENV FRAME_JPEG_QUALITY=70
+
+ENV INPUT_TASKS_PATH=/input/tasks.json
+ENV OUTPUT_RESULTS_PATH=/output/results.json
+ENTRYPOINT ["python", "run_batch.py"]
