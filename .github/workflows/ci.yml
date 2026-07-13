@@ -33,13 +33,10 @@ jobs:
         PYTHONPATH: ${{ github.workspace }}
       run: |
         python -c "
-        from engine.utils.config import CONFIG
-        from engine.core.pipeline import get_placeholder_captions
-        from engine.prompting.caption_validator import validate_and_overwrite
-        styles = ['formal', 'sarcastic', 'humorous_tech', 'humorous_non_tech']
-        placeholders = get_placeholder_captions(styles)
-        assert len(placeholders) == 4, 'Placeholder generation failed'
-        assert CONFIG['clip_budget_seconds'] > 0, 'Config loading failed'
+        from app.config import settings
+        from app.services.style_prompts import STYLE_ORDER
+        assert len(STYLE_ORDER) == 4, 'Style prompts failed'
+        assert settings.min_video_seconds > 0, 'Config loading failed'
         print('All smoke tests passed.')
         "
 
@@ -60,7 +57,7 @@ jobs:
       uses: docker/build-push-action@v5
       with:
         context: .
-        file: docker/Dockerfile
+        file: Dockerfile.submission
         push: true
         tags: |
           xzabir/nami:latest

@@ -18,12 +18,12 @@ COPY run_batch.py .
 # WARNING: The judging VM does NOT inject API keys. 
 # You MUST put your real Fireworks API key here before running `docker build`
 # and pushing to a public registry for the judges.
-ENV FIREWORKS_API_KEY="INSERT_YOUR_FIREWORKS_KEY_HERE"
+ENV FIREWORKS_API_KEY="fw_3WpiWBt1TPYNCAAcMY3Ssd"
 
 ENV MIN_VIDEO_SECONDS=2
 ENV MAX_VIDEO_SECONDS=300
 ENV FRAMES_PER_SECOND=1.0
-ENV FRAME_JPEG_QUALITY=70
+ENV FRAME_JPEG_QUALITY=80
 
 ENV INPUT_TASKS_PATH=/input/tasks.json
 ENV OUTPUT_RESULTS_PATH=/output/results.json
