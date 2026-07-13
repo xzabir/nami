@@ -24,9 +24,8 @@ def _run_captioning(job_id: str, video_url: str, db_factory):
     # Resolve relative URL path if it is an uploaded file
     video_path = video_url
     if video_url.startswith("/uploads/"):
-        # Build an absolute path so OpenCV can always find the file regardless
-        # of the current working directory (avoids the green-frame bug).
-        filename = video_url[len("/uploads/"):].lstrip("/")
+        # Prevent path traversal by extracting only the basename
+        filename = os.path.basename(video_url.lstrip("/"))
         video_path = os.path.join(_UPLOADS_DIR, filename)
 
     db: Session = db_factory()
@@ -86,6 +85,9 @@ def submit_video(
     db: Session = Depends(get_db),
     current_user: models.User = Depends(get_current_user),
 ):
+    if payload.video_url.startswith("/uploads/"):
+        raise HTTPException(status_code=400, detail="Cannot manually submit internal upload URLs")
+
     job = models.CaptionJob(owner_id=current_user.id, video_url=payload.video_url, status="pending")
     db.add(job)
     db.commit()
@@ -177,7 +179,8 @@ def delete_job(
 
     # If it is a local uploaded file, delete it from disk
     if job.video_url and job.video_url.startswith("/uploads/"):
-        local_path = job.video_url.lstrip("/")
+        filename = os.path.basename(job.video_url.lstrip("/"))
+        local_path = os.path.join(_UPLOADS_DIR, filename)
         if os.path.exists(local_path):
             try:
                 os.remove(local_path)
