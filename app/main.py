@@ -1,4 +1,5 @@
 import logging
+import os
 
 from fastapi import FastAPI
 from fastapi.middleware.cors import CORSMiddleware
@@ -12,9 +13,10 @@ logging.basicConfig(level=logging.INFO)
 
 app = FastAPI(title="Nami — Gemma Video Captioning", version="1.0.0")
 
+frontend_url = os.getenv("FRONTEND_URL", "http://localhost:5173")
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["http://localhost:5173", "http://localhost:8000"],
+    allow_origins=[frontend_url, "http://localhost:8000"],
     allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
@@ -22,9 +24,6 @@ app.add_middleware(
 
 app.include_router(auth_routes.router)
 app.include_router(caption_routes.router)
-
-
-import os
 
 
 @app.on_event("startup")
