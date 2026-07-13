@@ -50,15 +50,17 @@ This is the exact setup required by the hackathon judges. It reads tasks from an
 
 ### Mode B: The Minimalist Web Application
 
-Experience Nami through our beautifully designed, glassmorphic React frontend powered by a robust FastAPI + PostgreSQL backend.
+Experience Nami through our beautiful, glassmorphic Streamlit application. No complex full-stack deployment required!
 
-1. **Spin up the stack**:
+1. **Install dependencies**:
    ```bash
-   docker-compose up --build
+   pip install -r requirements.txt
    ```
-2. **Interact**: 
-   - Open `http://localhost:5173` to view the stunning minimalist frontend.
-   - Open `http://localhost:8000/docs` to view the interactive API documentation.
+2. **Launch Streamlit**: 
+   ```bash
+   streamlit run streamlit_app.py
+   ```
+   Open `http://localhost:8501` to view the UI. You can also deploy this instantly for free using **Streamlit Community Cloud**.
 
 ---
 
@@ -78,8 +80,7 @@ FRAME_JPEG_QUALITY=80
 ### Core Stack
 - **Vision Inference**: `httpx` and `accounts/fireworks/models/minimax-m3`
 - **Video Extraction**: `opencv-python-headless`
-- **Backend API**: FastAPI, Uvicorn, SQLAlchemy
-- **Frontend UI**: React, Vite, Custom Glassmorphism CSS
+- **Frontend UI**: Streamlit (Pure Python)
 
 ---
 
